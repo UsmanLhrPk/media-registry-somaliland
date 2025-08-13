@@ -2,7 +2,4 @@
 
 namespace App\Http\Controllers;
 
-class OwnerController
-{
-
-}
+class OwnerController {}

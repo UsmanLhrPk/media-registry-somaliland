@@ -2,7 +2,4 @@
 
 namespace App\Http\Controllers;
 
-class ReportController
-{
-
-}
+class ReportController {}
