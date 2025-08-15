@@ -22,6 +22,9 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 });
+Route::get('/admin', function () {
+    return Inertia::render('Admin/Applications'); 
+})->name('admin');
 
 Route::middleware([
     'auth:sanctum',
