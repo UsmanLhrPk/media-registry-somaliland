@@ -37,6 +37,7 @@ const submit = () => {
 </script>
 
 <template>
+
     <Head title="Register" />
 
     <AuthenticationCard>
@@ -48,10 +49,8 @@ const submit = () => {
         <div class="flex items-center justify-between mb-8">
             <!-- Step 1 -->
             <div class="flex items-center">
-                <div
-                    class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step > 1 ? 'bg-green-500 text-white border-green-500' : step === 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'"
-                >
+                <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
+                    :class="step > 1 ? 'bg-green-500 text-white border-green-500' : step === 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
                     <span v-if="step > 1">✓</span>
                     <span v-else>1</span>
                 </div>
@@ -64,10 +63,8 @@ const submit = () => {
 
             <!-- Step 2 -->
             <div class="flex items-center">
-                <div
-                    class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step > 2 ? 'bg-green-500 text-white border-green-500' : step === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'"
-                >
+                <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
+                    :class="step > 2 ? 'bg-green-500 text-white border-green-500' : step === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
                     <span v-if="step > 2">✓</span>
                     <span v-else>2</span>
                 </div>
@@ -80,10 +77,8 @@ const submit = () => {
 
             <!-- Step 3 -->
             <div class="flex items-center">
-                <div
-                    class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step === 3 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'"
-                >
+                <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
+                    :class="step === 3 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
                     3
                 </div>
                 <span class="ml-2 font-medium" :class="step >= 3 ? 'text-indigo-600' : 'text-gray-500'">
@@ -95,30 +90,34 @@ const submit = () => {
         <!-- Form Container -->
         <div class="wizard-container max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
             <form @submit.prevent="step === 3 ? submit() : nextStep()">
-                
+
                 <!-- Step 1: Owner Info -->
                 <div v-if="step === 1">
                     <div>
                         <InputLabel for="name" value="Name" />
-                        <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required autofocus autocomplete="name"/>
+                        <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required
+                            autofocus autocomplete="name" />
                         <InputError class="mt-2" :message="form.errors.name" />
                     </div>
 
                     <div class="mt-4">
                         <InputLabel for="email" value="Email" />
-                        <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required autocomplete="username"/>
+                        <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required
+                            autocomplete="username" />
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
 
                     <div class="mt-4">
                         <InputLabel for="password" value="Password" />
-                        <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full" required autocomplete="new-password"/>
+                        <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full"
+                            required autocomplete="new-password" />
                         <InputError class="mt-2" :message="form.errors.password" />
                     </div>
 
                     <div class="mt-4">
                         <InputLabel for="password_confirmation" value="Confirm Password" />
-                        <TextInput id="password_confirmation" v-model="form.password_confirmation" type="password" class="mt-1 block w-full" required autocomplete="new-password"/>
+                        <TextInput id="password_confirmation" v-model="form.password_confirmation" type="password"
+                            class="mt-1 block w-full" required autocomplete="new-password" />
                         <InputError class="mt-2" :message="form.errors.password_confirmation" />
                     </div>
 
@@ -127,10 +126,12 @@ const submit = () => {
                             <div class="flex items-center">
                                 <Checkbox id="terms" v-model:checked="form.terms" name="terms" required />
                                 <div class="ms-2">
-                                    I agree to the 
-                                    <a target="_blank" :href="route('terms.show')" class="underline text-sm text-gray-600 hover:text-gray-900">Terms of Service</a> 
-                                    and 
-                                    <a target="_blank" :href="route('policy.show')" class="underline text-sm text-gray-600 hover:text-gray-900">Privacy Policy</a>
+                                    I agree to the
+                                    <a target="_blank" :href="route('terms.show')"
+                                        class="underline text-sm text-gray-600 hover:text-gray-900">Terms of Service</a>
+                                    and
+                                    <a target="_blank" :href="route('policy.show')"
+                                        class="underline text-sm text-gray-600 hover:text-gray-900">Privacy Policy</a>
                                 </div>
                             </div>
                             <InputError class="mt-2" :message="form.errors.terms" />
@@ -139,7 +140,7 @@ const submit = () => {
 
                     <div class="flex items-center justify-end mt-4">
                         <Link :href="route('login')" class="underline text-sm text-gray-600 hover:text-gray-900">
-                            Already registered?
+                        Already registered?
                         </Link>
                         <PrimaryButton type="submit" class="ml-4">Next</PrimaryButton>
                     </div>
@@ -147,12 +148,13 @@ const submit = () => {
 
                 <!-- Step 2: Business Info -->
                 <div v-else-if="step === 2">
-                    <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard"/>
+                    <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard" />
                 </div>
 
                 <!-- Step 3: License Application (separate file now) -->
                 <div v-else-if="step === 3">
-                    <ApplicationForm :prevStep="prevStep" :submit="submit" :processing="form.processing" mode="wizard" />
+                    <ApplicationForm :prevStep="prevStep" :submit="submit" :processing="form.processing"
+                        mode="wizard" />
                 </div>
             </form>
         </div>

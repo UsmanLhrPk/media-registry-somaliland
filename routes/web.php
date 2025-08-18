@@ -64,8 +64,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     | Owners (Admin only)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:admin'])->group(function () {
-        Route::apiResource('owners', OwnerController::class)->except(['create', 'edit']);
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('owners', OwnerController::class);
     });
 
     /*
