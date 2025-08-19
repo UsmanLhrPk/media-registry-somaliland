@@ -10,6 +10,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
+use App\Models\Owner;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,6 +26,11 @@ Route::get('/', function () {
 Route::get('/admin', function () {
     return Inertia::render('Admin/Applications'); 
 })->name('admin');
+
+Route::get('/owners.index', function () {
+    // $owner = Owner::first(); // or auth()->user()->owner, etc.
+    return Inertia::render('Owners/Index');
+})->name('owners.index');
 
 Route::middleware([
     'auth:sanctum',
