@@ -12,6 +12,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -53,6 +54,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::prefix('auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::get('me', [AuthController::class, 'me']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admins (Super Admin only)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'role:superadmin'])->group(function () {
+        Route::resource('admins', AdminController::class);
     });
 
     /*
