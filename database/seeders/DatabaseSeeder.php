@@ -11,9 +11,22 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        $ownerRole = Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
+        // Roles create
+        $superAdminRole = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web']);
+        $adminRole      = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $ownerRole      = Role::firstOrCreate(['name' => 'owner', 'guard_name' => 'web']);
 
+        // Super Admin User
+        $superAdmin = User::firstOrCreate(
+            ['email' => 'superadmin@example.com'],
+            [
+                'name' => 'Super Admin User',
+                'password' => Hash::make('password'),
+            ]
+        );
+        $superAdmin->assignRole($superAdminRole);
+
+        // Admin User
         $admin = User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
@@ -21,7 +34,9 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
+        $admin->assignRole($adminRole);
 
+        // Owner User
         $owner = User::firstOrCreate(
             ['email' => 'owner@example.com'],
             [
@@ -29,11 +44,10 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make('password'),
             ]
         );
-
-        $admin->assignRole($adminRole);
         $owner->assignRole($ownerRole);
 
-        $this->command->info('Admin and Owner users created with roles assigned.');
+        $this->command->info('Super Admin, Admin, and Owner users created with roles assigned.');
+        $this->command->warn('Super Admin Login: superadmin@example.com / password');
         $this->command->warn('Admin Login: admin@example.com / password');
         $this->command->warn('Owner Login: owner@example.com / password');
     }

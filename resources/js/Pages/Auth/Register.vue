@@ -12,10 +12,15 @@ import ApplicationForm from './ApplicationForm.vue';
 import { ref } from 'vue';
 
 const form = useForm({
-    name: '',
+    full_name: '',
     email: '',
     password: '',
     password_confirmation: '',
+    job_title: '',
+    id_number: '',
+    id_type: '',
+    address: '',
+    phone: '',
     terms: false,
 });
 
@@ -31,7 +36,9 @@ const prevStep = () => {
 
 const submit = () => {
     form.post(route('register'), {
-        onFinish: () => form.reset('password', 'password_confirmation'),
+        onFinish: () => {
+            form.reset('password', 'password_confirmation');
+        },
     });
 };
 </script>
@@ -93,32 +100,74 @@ const submit = () => {
 
                 <!-- Step 1: Owner Info -->
                 <div v-if="step === 1">
+                    <h3 class="text-lg font-semibold mb-4">Owner Information</h3>
+
                     <div>
-                        <InputLabel for="name" value="Name" />
-                        <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required
-                            autofocus autocomplete="name" />
-                        <InputError class="mt-2" :message="form.errors.name" />
+                        <InputLabel for="full_name" value="Full Name *" />
+                        <TextInput id="full_name" v-model="form.full_name" type="text" class="mt-1 block w-full"
+                            required autofocus />
+                        <InputError class="mt-2" :message="form.errors.full_name" />
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="email" value="Email" />
-                        <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required
-                            autocomplete="username" />
+                        <InputLabel for="email" value="Email *" />
+                        <TextInput id="email" v-model="form.email" type="email" class="mt-1 block w-full" required />
                         <InputError class="mt-2" :message="form.errors.email" />
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="password" value="Password" />
+                        <InputLabel for="password" value="Password *" />
                         <TextInput id="password" v-model="form.password" type="password" class="mt-1 block w-full"
-                            required autocomplete="new-password" />
+                            required />
                         <InputError class="mt-2" :message="form.errors.password" />
                     </div>
 
                     <div class="mt-4">
-                        <InputLabel for="password_confirmation" value="Confirm Password" />
+                        <InputLabel for="password_confirmation" value="Confirm Password *" />
                         <TextInput id="password_confirmation" v-model="form.password_confirmation" type="password"
-                            class="mt-1 block w-full" required autocomplete="new-password" />
+                            class="mt-1 block w-full" required />
                         <InputError class="mt-2" :message="form.errors.password_confirmation" />
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="job_title" value="Job Title *" />
+                        <TextInput id="job_title" v-model="form.job_title" type="text" class="mt-1 block w-full"
+                            required />
+                        <InputError class="mt-2" :message="form.errors.job_title" />
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="id_type" value="ID Type *" />
+                        <select id="id_type" v-model="form.id_type"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                            required>
+                            <option value="">Select ID Type</option>
+                            <option value="cnic">CNIC</option>
+                            <option value="passport">Passport</option>
+                            <option value="driving_license">Driving License</option>
+                        </select>
+                        <InputError class="mt-2" :message="form.errors.id_type" />
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="id_number" value="ID Number *" />
+                        <TextInput id="id_number" v-model="form.id_number" type="text" class="mt-1 block w-full"
+                            required />
+                        <InputError class="mt-2" :message="form.errors.id_number" />
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="phone" value="Phone Number *" />
+                        <TextInput id="phone" v-model="form.phone" type="text" class="mt-1 block w-full" required />
+                        <InputError class="mt-2" :message="form.errors.phone" />
+                    </div>
+
+                    <div class="mt-4">
+                        <InputLabel for="address" value="Address *" />
+                        <textarea id="address" v-model="form.address"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                            rows="3" required></textarea>
+                        <InputError class="mt-2" :message="form.errors.address" />
                     </div>
 
                     <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-4">
@@ -151,7 +200,7 @@ const submit = () => {
                     <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard" />
                 </div>
 
-                <!-- Step 3: License Application (separate file now) -->
+                <!-- Step 3: License Application -->
                 <div v-else-if="step === 3">
                     <ApplicationForm :prevStep="prevStep" :submit="submit" :processing="form.processing"
                         mode="wizard" />

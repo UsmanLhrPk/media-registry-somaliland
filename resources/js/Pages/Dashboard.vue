@@ -1,125 +1,89 @@
 <script setup>
-import { ref } from 'vue';
-import AppLayout from '@/Layouts/AppLayout.vue';
-import BusinessForm from './Auth/BusinessForm.vue';
-import ApplicationForm from './Auth/ApplicationForm.vue';
+import { Head, router } from '@inertiajs/vue3';
 
-const showBusinessModal = ref(false);
-const showApplicationModal = ref(false);
 
-const closeBusinessModal = () => (showBusinessModal.value = false);
-const closeApplicationModal = () => (showApplicationModal.value = false);
+const props = defineProps({
+  auth: Object,
+});
 
-const handleBusinessSubmit = () => {
-  console.log("Business submitted");
-  closeBusinessModal();
-};
-
-const handleApplicationSubmit = () => {
-  console.log("Application submitted");
-  closeApplicationModal();
+// logout function
+const logout = () => {
+  router.post(route('logout'));
 };
 </script>
 
 <template>
-  <AppLayout title="Dashboard">
-    <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        Dashboard
-      </h2>
-    </template>
+  <div>
+
+    <Head title="Dashboard" />
 
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        
-        <!-- 3 Column Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
-          <!-- Column 1 - Welcome & Actions -->
-          <div class="bg-white shadow rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              Welcome Back!
-            </h3>
-            <p class="text-gray-600 mb-6">
-              Use the quick actions below to manage your businesses and apply for licenses.
-            </p>
-            <div class="space-y-4">
-              <button
-                @click="showBusinessModal = true"
-                class="w-full px-6 py-3 bg-indigo-600 text-white rounded-lg shadow hover:bg-indigo-700"
-              >
-                Create Business Info
+        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
+          <div class="p-6">
+            <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+
+            <!-- User Info Card -->
+            <div class="bg-gray-50 p-4 rounded-lg mb-6">
+              <h2 class="text-lg font-semibold mb-2">Welcome, {{ props.auth?.user?.name }}!</h2>
+              <p class="text-gray-600">Email: {{ props.auth?.user?.email }}</p>
+
+              <!-- Logout Button -->
+              <button @click="logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow">
+                Logout
               </button>
-              <button
-                @click="showApplicationModal = true"
-                class="w-full px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700"
-              >
-                Apply for License
-              </button>
+
+              <!-- Role Display -->
+              <div class="mt-4">
+                <div v-if="props.auth?.user?.role === 'owner'"
+                  class="bg-green-100 text-green-800 px-3 py-1 rounded-full inline-block">
+                  <strong> Owner</strong>
+                </div>
+
+                <div v-else-if="props.auth?.user?.role === 'admin'"
+                  class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full inline-block">
+                  <strong> Admin</strong>
+                </div>
+
+                <div v-else class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full inline-block">
+                  <strong> User</strong>
+                </div>
+              </div>
+
+              <!-- Debug Info -->
+              <div class="mt-4 p-2 bg-yellow-50 rounded text-xs">
+                <p><strong>Debug Info:</strong></p>
+                <p>Role: {{ props.auth?.user?.role }}</p>
+                <p>All Roles: {{ props.auth?.user?.roles?.join(', ') }}</p>
+              </div>
+            </div>
+
+            <!-- Owner-specific content -->
+            <div v-if="props.auth?.user?.role === 'owner'" class="bg-blue-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-2">Owner Dashboard</h3>
+              <p>Welcome to your owner panel! You can manage your business from here.</p>
+
+              <!-- Owner details if available -->
+              <div v-if="props.auth?.user?.owner" class="mt-3">
+                <p><strong>Job Title:</strong> {{ props.auth.user.owner.job_title }}</p>
+                <p><strong>Phone:</strong> {{ props.auth.user.owner.phone }}</p>
+              </div>
+            </div>
+
+            <!-- Admin-specific content -->
+            <div v-else-if="props.auth?.user?.role === 'admin'" class="bg-purple-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-2">Admin Dashboard</h3>
+              <p>Welcome to the admin panel! You have full system access.</p>
+            </div>
+
+            <!-- Regular user content -->
+            <div v-else class="bg-gray-50 p-4 rounded-lg">
+              <h3 class="text-lg font-semibold mb-2">User Dashboard</h3>
+              <p>Welcome! You have basic user access.</p>
             </div>
           </div>
-
-          <!-- Column 2 - Applications -->
-          <div class="bg-white shadow rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              Your Applications
-            </h3>
-            <ul class="divide-y divide-gray-200">
-              <li class="py-3">Application #1 (Pending)</li>
-              <li class="py-3">Application #2 (Approved)</li>
-              <li class="py-3">Application #3 (Rejected)</li>
-            </ul>
-          </div>
-
-          <!-- Column 3 - Businesses -->
-          <div class="bg-white shadow rounded-lg p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-              Your Businesses
-            </h3>
-            <ul class="divide-y divide-gray-200">
-              <li class="py-3">Business 1 (Dummy)</li>
-              <li class="py-3">Business 2 (Dummy)</li>
-              <li class="py-3">Business 3 (Dummy)</li>
-            </ul>
-          </div>
-
         </div>
       </div>
     </div>
-
-    <!-- Business Modal -->
-    <div
-      v-if="showBusinessModal"
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    >
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Business Info</h3>
-          <button @click="closeBusinessModal" class="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        <BusinessForm
-          :submit="handleBusinessSubmit" 
-          mode="standalone"
-        />
-      </div>
-    </div>
-
-    <!-- Application Modal -->
-    <div
-      v-if="showApplicationModal"
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-    >
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">License Application</h3>
-          <button @click="closeApplicationModal" class="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        <ApplicationForm
-          :submit="handleApplicationSubmit"
-          :processing="false"
-          mode="standalone"
-        />
-      </div>
-    </div>
-  </AppLayout>
+  </div>
 </template>
