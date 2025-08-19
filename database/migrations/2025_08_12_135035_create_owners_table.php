@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('owners', function (Blueprint $table) {
             $table->id();
-            $table->string('full_name', 150);
-            $table->string('job_title', 150)->nullable();
-            $table->string('id_number', 100)->unique();
-            $table->enum('id_type', ['id_card', 'passport']);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('full_name');
+            $table->string('job_title');
+            $table->string('id_number')->unique();
+            $table->enum('id_type', ['cnic', 'passport', 'driving_license']);
             $table->text('address');
-            $table->string('phone', 50);
-            $table->string('email', 255)->unique();
+            $table->string('phone');
+            $table->string('email');
             $table->timestamps();
         });
     }
