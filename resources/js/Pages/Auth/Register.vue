@@ -24,6 +24,18 @@ const form = useForm({
     terms: false,
 });
 
+// Business form data
+const businessData = ref({
+    business_name: '',
+    ownership_type: '',
+    work_type: '',
+    other_work_type: '',
+    reason: '',
+    office_location: '',
+    phone: '',
+    email: '',
+});
+
 const step = ref(1);
 
 const nextStep = () => {
@@ -34,10 +46,40 @@ const prevStep = () => {
     if (step.value > 1) step.value--;
 };
 
+// Handle BusinessForm
+const updateBusinessData = (data) => {
+    businessData.value = { ...data };
+};
+
 const submit = () => {
-    form.post(route('register'), {
+    // Create a new form with all data combined
+    const completeForm = useForm({
+        // Owner data
+        full_name: form.full_name,
+        email: form.email,
+        password: form.password,
+        password_confirmation: form.password_confirmation,
+        job_title: form.job_title,
+        id_number: form.id_number,
+        id_type: form.id_type,
+        address: form.address,
+        phone: form.phone,
+        terms: form.terms,
+
+        // Business data
+        business_name: businessData.value.business_name,
+        ownership_type: businessData.value.ownership_type,
+        work_type: businessData.value.work_type,
+        other_work_type: businessData.value.other_work_type,
+        reason: businessData.value.reason,
+        office_location: businessData.value.office_location,
+        business_phone: businessData.value.phone,
+        business_email: businessData.value.email,
+    });
+
+    completeForm.post(route('register'), {
         onFinish: () => {
-            form.reset('password', 'password_confirmation');
+            completeForm.reset('password', 'password_confirmation');
         },
     });
 };
@@ -197,7 +239,8 @@ const submit = () => {
 
                 <!-- Step 2: Business Info -->
                 <div v-else-if="step === 2">
-                    <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard" />
+                    <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard" v-model="businessData"
+                        @update:modelValue="updateBusinessData" />
                 </div>
 
                 <!-- Step 3: License Application -->

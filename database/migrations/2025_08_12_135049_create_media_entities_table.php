@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('business_name', 255);
             $table->enum('ownership_type', ['sole_proprietorship', 'partnership', 'corporation']);
             $table->enum('work_type', ['tv', 'radio', 'online_news', 'newspaper', 'other']);
-            $table->string('other_work_type');
+            $table->string('other_work_type')->nullable();
             $table->enum('reason', ['new_license', 'renewal']);
             $table->text('office_location');
             $table->string('phone', 50);

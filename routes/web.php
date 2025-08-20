@@ -79,13 +79,21 @@ Route::middleware(['auth:sanctum'])->group(function () {
     | Media Entities
     |--------------------------------------------------------------------------
     */
-    Route::get('media-entities', [MediaEntityController::class, 'index'])->middleware('role:admin|reviewer');
-    Route::get('media-entities/mine', [MediaEntityController::class, 'myEntities'])->middleware('role:owner');
-    Route::get('media-entities/{id}', [MediaEntityController::class, 'show'])->middleware('role:admin|reviewer|owner');
-    Route::post('media-entities', [MediaEntityController::class, 'store'])->middleware('role:owner|admin');
-    Route::put('media-entities/{id}', [MediaEntityController::class, 'update'])->middleware('role:owner|admin');
-    Route::delete('media-entities/{id}', [MediaEntityController::class, 'destroy'])->middleware('role:admin');
+    // Route::get('media-entities', [MediaEntityController::class, 'index'])->middleware('role:admin|reviewer');
+    // Route::get('media-entities/mine', [MediaEntityController::class, 'myEntities'])->middleware('role:owner');
+    // Route::get('media-entities/{id}', [MediaEntityController::class, 'show'])->middleware('role:admin|reviewer|owner');
+    // Route::post('media-entities', [MediaEntityController::class, 'store'])->middleware('role:owner|admin');
+    // Route::put('media-entities/{id}', [MediaEntityController::class, 'update'])->middleware('role:owner|admin');
+    // Route::delete('media-entities/{id}', [MediaEntityController::class, 'destroy'])->middleware('role:admin');
 
+   Route::middleware('auth')->group(function () {
+    // Store business information
+    Route::post('/media-entities', [MediaEntityController::class, 'store'])->name('media-entities.store');
+    
+    // Get owner's media entities
+    Route::get('/api/owner/media-entities', [MediaEntityController::class, 'getOwnerMediaEntities'])->name('owner.media-entities');
+});
+   
     /*
     |--------------------------------------------------------------------------
     | Applications

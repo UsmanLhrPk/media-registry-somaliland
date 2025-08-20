@@ -5,6 +5,7 @@ namespace App\Actions\Fortify;
 use App\Models\User;
 use App\Models\Owner;
 use App\Models\Role;
+use App\Models\MediaEntity;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -33,6 +34,16 @@ class CreateNewUser implements CreatesNewUsers
             'address' => ['required', 'string', 'max:500'],
             'phone' => ['required', 'string', 'max:20'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
+            
+            // Business validation rules
+            'business_name' => ['required', 'string', 'max:255'],
+            'ownership_type' => ['required', 'in:sole_proprietorship,partnership,corporation'],
+            'work_type' => ['required', 'in:tv,radio,online_news,newspaper,other'],
+            'other_work_type' => ['nullable', 'string', 'max:255'],
+            'reason' => ['required', 'in:new_license,renewal'],
+            'office_location' => ['required', 'string'],
+            'business_phone' => ['required', 'string', 'max:50'],
+            'business_email' => ['required', 'email', 'max:255'],
         ]);
         
         $validator->validate();
@@ -48,7 +59,7 @@ class CreateNewUser implements CreatesNewUsers
             ]);
 
             // Owner create
-            Owner::create([
+            $owner = Owner::create([
                 'user_id' => $user->id,
                 'full_name' => $input['full_name'],
                 'job_title' => $input['job_title'],
@@ -59,7 +70,20 @@ class CreateNewUser implements CreatesNewUsers
                 'email' => $input['email'],
             ]);
 
-            // User role assignment
+            // Create Media Entity (Business)
+            MediaEntity::create([
+                'owner_id' => $owner->id,
+                'business_name' => $input['business_name'],
+                'ownership_type' => $input['ownership_type'],
+                'work_type' => $input['work_type'],
+                'other_work_type' => $input['other_work_type'] ?? '',
+                'reason' => $input['reason'],
+                'office_location' => $input['office_location'],
+                'phone' => $input['business_phone'],
+                'email' => $input['business_email'],
+            ]);
+
+            //  User role assignment
             $ownerRole = Role::firstOrCreate([
                 'name' => 'owner',
                 'guard_name' => 'web'
