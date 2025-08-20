@@ -1,5 +1,6 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
+import AppLayout from '@/Layouts/AppLayout.vue';
 
 const props = defineProps({
     admin: Object
@@ -21,97 +22,120 @@ function submit() {
 </script>
 
 <template>
-    <div class="p-6">
+  <AppLayout :title="`Edit Admin - ${admin.name}`">
+    <template #header>
+      <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        Edit Admin
+      </h2>
+    </template>
 
-        <Head :title="`Edit Admin - ${admin.name}`" />
+    <div class="py-12">
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white shadow-xl sm:rounded-lg p-6">
+          <!-- Header Actions -->
+          <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">
+              Editing: {{ admin.name }}
+            </h1>
 
-        <h1 class="text-2xl font-bold mb-6">Edit Admin - {{ admin.name }}</h1>
+            <Link
+              href="/dashboard"
+              class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+            >
+              Back to List
+            </Link>
+          </div>
 
-        <div class="max-w-2xl">
-            <form @submit.prevent="submit" class="space-y-6">
-                <!-- Personal Information -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-lg font-semibold mb-4 text-gray-800">Personal Information</h2>
+          <!-- Form -->
+          <form @submit.prevent="submit" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Personal Info -->
+            <div class="space-y-4">
+              <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                Personal Information
+              </h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Full Name *</label>
-                            <input v-model="form.name" type="text" placeholder="Enter full name" required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.name" class="text-red-600 text-sm mt-1">{{ form.errors.name }}</div>
-                        </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Full Name *</label>
+                <input v-model="form.name" type="text" required
+                  class="w-full border rounded px-3 py-2" />
+                <div v-if="form.errors.name" class="text-red-600 text-sm mt-1">{{ form.errors.name }}</div>
+              </div>
 
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Email *</label>
-                            <input v-model="form.email" type="email" placeholder="Enter email address" required
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.email" class="text-red-600 text-sm mt-1">{{ form.errors.email }}
-                            </div>
-                        </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Email *</label>
+                <input v-model="form.email" type="email" required
+                  class="w-full border rounded px-3 py-2" />
+                <div v-if="form.errors.email" class="text-red-600 text-sm mt-1">{{ form.errors.email }}</div>
+              </div>
 
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Phone</label>
-                            <input v-model="form.phone" type="text" placeholder="Enter phone number"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.phone" class="text-red-600 text-sm mt-1">{{ form.errors.phone }}
-                            </div>
-                        </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Phone</label>
+                <input v-model="form.phone" type="text"
+                  class="w-full border rounded px-3 py-2" />
+                <div v-if="form.errors.phone" class="text-red-600 text-sm mt-1">{{ form.errors.phone }}</div>
+              </div>
+            </div>
 
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Department</label>
-                            <input v-model="form.department" type="text" placeholder="e.g., IT, HR, Finance"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.department" class="text-red-600 text-sm mt-1">{{
-                                form.errors.department }}</div>
-                        </div>
+            <!-- Work Info -->
+            <div class="space-y-4">
+              <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                Work Information
+              </h2>
 
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Designation</label>
-                            <input v-model="form.designation" type="text"
-                                placeholder="e.g., Admin Officer, System Administrator"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.designation" class="text-red-600 text-sm mt-1">{{
-                                form.errors.designation }}</div>
-                        </div>
-                    </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Department</label>
+                <input v-model="form.department" type="text"
+                  placeholder="e.g., IT, HR, Finance"
+                  class="w-full border rounded px-3 py-2" />
+                <div v-if="form.errors.department" class="text-red-600 text-sm mt-1">{{ form.errors.department }}</div>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium mb-1">Designation</label>
+                <input v-model="form.designation" type="text"
+                  placeholder="e.g., Admin Officer, System Administrator"
+                  class="w-full border rounded px-3 py-2" />
+                <div v-if="form.errors.designation" class="text-red-600 text-sm mt-1">{{ form.errors.designation }}</div>
+              </div>
+            </div>
+
+            <!-- Password Change -->
+            <div class="col-span-2 space-y-4">
+              <h2 class="text-lg font-semibold text-gray-800 border-b pb-2">
+                Change Password (Optional)
+              </h2>
+              <p class="text-sm text-gray-600">Leave blank if you don’t want to change the password.</p>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1">New Password</label>
+                  <input v-model="form.password" type="password"
+                    class="w-full border rounded px-3 py-2" />
+                  <div v-if="form.errors.password" class="text-red-600 text-sm mt-1">{{ form.errors.password }}</div>
                 </div>
 
-                <!-- Password Change (Optional) -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="text-lg font-semibold mb-4 text-gray-800">Change Password (Optional)</h2>
-                    <p class="text-sm text-gray-600 mb-4">Leave blank if you don't want to change the password</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">New Password</label>
-                            <input v-model="form.password" type="password"
-                                placeholder="Enter new password (min 8 characters)"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                            <div v-if="form.errors.password" class="text-red-600 text-sm mt-1">{{ form.errors.password
-                                }}</div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Confirm New Password</label>
-                            <input v-model="form.password_confirmation" type="password"
-                                placeholder="Confirm new password"
-                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                        </div>
-                    </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Confirm Password</label>
+                  <input v-model="form.password_confirmation" type="password"
+                    class="w-full border rounded px-3 py-2" />
                 </div>
+              </div>
+            </div>
 
-                <!-- Action Buttons -->
-                <div class="flex space-x-4">
-                    <button type="submit" :disabled="form.processing"
-                        class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed font-medium">
-                        {{ form.processing ? 'Updating...' : 'Update Admin' }}
-                    </button>
+            <!-- Actions -->
+            <div class="col-span-2 flex justify-end space-x-4 pt-6 border-t">
+              <button type="submit" :disabled="form.processing"
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
+                {{ form.processing ? 'Updating...' : 'Update Admin' }}
+              </button>
 
-                    <a href="/admins" class="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 font-medium">
-                        Cancel
-                    </a>
-                </div>
-            </form>
+              <Link href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                Cancel
+              </Link>
+            </div>
+          </form>
         </div>
+      </div>
     </div>
+  </AppLayout>
 </template>

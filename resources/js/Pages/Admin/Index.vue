@@ -25,7 +25,7 @@ const deleteAdmin = (adminId, adminName) => {
                         <div class="flex justify-between items-center mb-6">
                             <h1 class="text-2xl font-bold text-gray-900">Manage Admins</h1>
                             <Link :href="route('admins.create')"
-                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition duration-200">
+                class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
                             Create New Admin
                             </Link>
                         </div>
@@ -99,14 +99,6 @@ const deleteAdmin = (adminId, adminName) => {
                             <Link :href="route('admins.create')"
                                 class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition duration-200">
                             Create First Admin
-                            </Link>
-                        </div>
-
-                        <!-- Back to Dashboard -->
-                        <div class="mt-6">
-                            <Link :href="route('dashboard')"
-                                class="text-gray-600 hover:text-gray-900 transition duration-200">
-                            ← Back to Dashboard
                             </Link>
                         </div>
                     </div>

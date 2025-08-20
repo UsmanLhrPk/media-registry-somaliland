@@ -11,6 +11,7 @@ use App\Http\Controllers\OwnerController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Models\Owner;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminController;
@@ -35,7 +36,19 @@ Route::middleware([
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
+        // Get admins with roles
+        $admins = User::whereHas('roles', function($query) {
+            $query->where('name', 'admin');
+        })->with(['roles'])->get();
+
+        // Get owners with their user relation
+        $owners = Owner::with('user')->get();
+
+        // Send both to Dashboard.vue
+        return Inertia::render('Dashboard', [
+            'admins' => $admins,
+            'owners' => $owners,
+        ]);
     })->name('dashboard');
 });
 

@@ -39,7 +39,7 @@ function submit() {
             </h1>
 
             <Link
-              href="/owners"
+              href="/dashboard"
               class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
             >
               Back to List
@@ -113,7 +113,7 @@ function submit() {
                 {{ form.processing ? 'Updating...' : 'Update Owner' }}
               </button>
 
-              <Link href="/owners" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+              <Link href="/dashboard" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
                 Cancel
               </Link>
             </div>
