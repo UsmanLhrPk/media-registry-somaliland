@@ -53,6 +53,74 @@ class LicenseController extends Controller
     }
 
     /**
+     * Get all license applications for admin/super admin
+     */
+    public function index()
+    {
+        $licenses = License::with(['mediaEntity.owner.user'])
+            ->latest()
+            ->get()
+            ->map(function ($license) {
+                return [
+                    'id' => $license->id,
+                    'license_number' => $license->license_number,
+                    'business_name' => $license->mediaEntity->business_name,
+                    'owner_name' => $license->mediaEntity->owner->full_name,
+                    'work_type' => $license->mediaEntity->formatted_work_type,
+                    'license_type' => $license->formatted_license_type,
+                    'status' => $license->status,
+                    'issue_date' => $license->issue_date->format('M d, Y'),
+                    'expiry_date' => $license->expiry_date->format('M d, Y'),
+                    'created_at' => $license->created_at->format('M d, Y'),
+                    // Additional details for admin view
+                    'owner_email' => $license->mediaEntity->owner->email,
+                    'owner_phone' => $license->mediaEntity->owner->phone,
+                    'business_phone' => $license->mediaEntity->phone,
+                    'business_email' => $license->mediaEntity->email,
+                    'office_location' => $license->mediaEntity->office_location,
+                ];
+            });
+
+        return response()->json($licenses);
+    }
+
+    /**
+     * Update license status (approve/reject)
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:active,revoked',
+            'admin_comment' => 'nullable|string|max:1000',
+        ]);
+
+        $license = License::findOrFail($id);
+        
+        // Update license status
+        $license->update([
+            'status' => $request->status,
+        ]);
+
+        // Log admin action
+        \Log::info('License status updated', [
+            'license_id' => $license->id,
+            'old_status' => $license->getOriginal('status'),
+            'new_status' => $request->status,
+            'admin_id' => Auth::id(),
+            'admin_comment' => $request->admin_comment,
+        ]);
+
+        return response()->json([
+            'message' => 'License status updated successfully',
+            'license' => [
+                'id' => $license->id,
+                'status' => $license->status,
+                'license_number' => $license->license_number,
+            ]
+        ]);
+    }
+
+    /**
      * Get licenses for the authenticated owner
      */
     public function myLicenses()
@@ -86,6 +154,37 @@ class LicenseController extends Controller
     }
 
     /**
+     * Show specific license
+     */
+    public function show($id)
+    {
+        $license = License::with(['mediaEntity.owner.user'])->findOrFail($id);
+        
+        return response()->json([
+            'id' => $license->id,
+            'license_number' => $license->license_number,
+            'license_type' => $license->formatted_license_type,
+            'status' => $license->status,
+            'issue_date' => $license->issue_date->format('M d, Y'),
+            'expiry_date' => $license->expiry_date->format('M d, Y'),
+            'business' => [
+                'name' => $license->mediaEntity->business_name,
+                'work_type' => $license->mediaEntity->formatted_work_type,
+                'ownership_type' => $license->mediaEntity->formatted_ownership_type,
+                'phone' => $license->mediaEntity->phone,
+                'email' => $license->mediaEntity->email,
+                'office_location' => $license->mediaEntity->office_location,
+            ],
+            'owner' => [
+                'name' => $license->mediaEntity->owner->full_name,
+                'email' => $license->mediaEntity->owner->email,
+                'phone' => $license->mediaEntity->owner->phone,
+                'job_title' => $license->mediaEntity->owner->job_title,
+            ]
+        ]);
+    }
+
+    /**
      * Generate unique license number
      */
     private function generateLicenseNumber()
@@ -106,23 +205,5 @@ class LicenseController extends Controller
         }
 
         return $prefix . $year . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
-    }
-
-    /**
-     * Show all licenses (Admin only)
-     */
-    public function index()
-    {
-        $licenses = License::with('mediaEntity.owner')->latest()->get();
-        return response()->json($licenses);
-    }
-
-    /**
-     * Show specific license
-     */
-    public function show($id)
-    {
-        $license = License::with('mediaEntity.owner')->findOrFail($id);
-        return response()->json($license);
     }
 }
