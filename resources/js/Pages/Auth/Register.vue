@@ -8,7 +8,6 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import BusinessForm from './BusinessForm.vue';
-import ApplicationForm from './ApplicationForm.vue';
 import { ref } from 'vue';
 
 const form = useForm({
@@ -36,25 +35,58 @@ const businessData = ref({
     email: '',
 });
 
+// Track what steps have been filled
+const completedSteps = ref({
+    step1: false,
+    step2: false,
+});
+
 const step = ref(1);
 
 const nextStep = () => {
-    if (step.value < 3) step.value++;
+    if (step.value < 2) step.value++;
 };
 
 const prevStep = () => {
     if (step.value > 1) step.value--;
 };
 
-// Handle BusinessForm
-const updateBusinessData = (data) => {
-    businessData.value = { ...data };
+// Skip step 2 (Business Info) and register
+const skipStep2AndRegister = () => {
+    completedSteps.value.step2 = false;
+    businessData.value = {
+        business_name: '',
+        ownership_type: '',
+        work_type: '',
+        other_work_type: '',
+        reason: '',
+        office_location: '',
+        phone: '',
+        email: '',
+    };
+    submitRegistration();
 };
 
-const submit = () => {
-    // Create a new form with all data combined
-    const completeForm = useForm({
-        // Owner data
+// Handle business data update from BusinessForm
+const updateBusinessData = (data) => {
+    businessData.value = { ...data };
+    completedSteps.value.step2 = true;
+    console.log('Business data updated:', businessData.value);
+};
+
+// Mark step 1 as completed when moving to next step
+const handleStep1Next = () => {
+    completedSteps.value.step1 = true;
+    nextStep();
+};
+
+// Submit registration
+const submitRegistration = () => {
+    console.log('Submitting registration with completed steps:', completedSteps.value);
+    console.log('Business data:', businessData.value);
+
+    const registrationData = {
+        // Always include owner data (Step 1)
         full_name: form.full_name,
         email: form.email,
         password: form.password,
@@ -66,21 +98,40 @@ const submit = () => {
         phone: form.phone,
         terms: form.terms,
 
-        // Business data
-        business_name: businessData.value.business_name,
-        ownership_type: businessData.value.ownership_type,
-        work_type: businessData.value.work_type,
-        other_work_type: businessData.value.other_work_type,
-        reason: businessData.value.reason,
-        office_location: businessData.value.office_location,
-        business_phone: businessData.value.phone,
-        business_email: businessData.value.email,
-    });
+        // Include what steps were completed
+        completed_steps: {
+            step1: completedSteps.value.step1,
+            step2: completedSteps.value.step2,
+        }
+    };
+
+    // Add business data if step 2 was completed
+    if (completedSteps.value.step2) {
+        registrationData.business_name = businessData.value.business_name;
+        registrationData.ownership_type = businessData.value.ownership_type;
+        registrationData.work_type = businessData.value.work_type;
+        registrationData.other_work_type = businessData.value.other_work_type;
+        registrationData.reason = businessData.value.reason;
+        registrationData.office_location = businessData.value.office_location;
+        registrationData.business_phone = businessData.value.phone;
+        registrationData.business_email = businessData.value.email;
+    }
+
+    console.log('Final registration data:', registrationData);
+
+    // Create form and submit
+    const completeForm = useForm(registrationData);
 
     completeForm.post(route('register'), {
         onFinish: () => {
             completeForm.reset('password', 'password_confirmation');
         },
+        onSuccess: () => {
+            console.log('Registration successful!');
+        },
+        onError: (errors) => {
+            console.error('Registration errors:', errors);
+        }
     });
 };
 </script>
@@ -99,8 +150,8 @@ const submit = () => {
             <!-- Step 1 -->
             <div class="flex items-center">
                 <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step > 1 ? 'bg-green-500 text-white border-green-500' : step === 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
-                    <span v-if="step > 1">✓</span>
+                    :class="completedSteps.step1 ? 'bg-green-500 text-white border-green-500' : step === 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
+                    <span v-if="completedSteps.step1">✓</span>
                     <span v-else>1</span>
                 </div>
                 <span class="ml-2 font-medium" :class="step >= 1 ? 'text-indigo-600' : 'text-gray-500'">
@@ -113,32 +164,19 @@ const submit = () => {
             <!-- Step 2 -->
             <div class="flex items-center">
                 <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step > 2 ? 'bg-green-500 text-white border-green-500' : step === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
-                    <span v-if="step > 2">✓</span>
+                    :class="completedSteps.step2 ? 'bg-green-500 text-white border-green-500' : step === 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
+                    <span v-if="completedSteps.step2">✓</span>
                     <span v-else>2</span>
                 </div>
                 <span class="ml-2 font-medium" :class="step >= 2 ? 'text-indigo-600' : 'text-gray-500'">
-                    Business Info
-                </span>
-            </div>
-
-            <div class="flex-1 border-t-2 mx-2" :class="step >= 3 ? 'border-indigo-600' : 'border-gray-300'"></div>
-
-            <!-- Step 3 -->
-            <div class="flex items-center">
-                <div class="flex items-center justify-center w-8 h-8 rounded-full border-2"
-                    :class="step === 3 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-300 text-gray-400'">
-                    3
-                </div>
-                <span class="ml-2 font-medium" :class="step >= 3 ? 'text-indigo-600' : 'text-gray-500'">
-                    License Application
+                    Business Info <span class="text-xs">(Optional)</span>
                 </span>
             </div>
         </div>
 
         <!-- Form Container -->
         <div class="wizard-container max-w-lg mx-auto p-6 bg-white rounded-lg shadow-md">
-            <form @submit.prevent="step === 3 ? submit() : nextStep()">
+            <form @submit.prevent="step === 1 ? handleStep1Next() : submitRegistration()">
 
                 <!-- Step 1: Owner Info -->
                 <div v-if="step === 1">
@@ -239,14 +277,37 @@ const submit = () => {
 
                 <!-- Step 2: Business Info -->
                 <div v-else-if="step === 2">
-                    <BusinessForm :prevStep="prevStep" :nextStep="nextStep" mode="wizard" v-model="businessData"
-                        @update:modelValue="updateBusinessData" />
-                </div>
+                    <div class="mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">Business Information</h3>
+                        <p class="text-sm text-gray-600 mt-1">
+                            This step is optional. You can skip it and add business information later from your
+                            dashboard.
+                        </p>
+                        <p class="text-sm text-blue-600 mt-1">
+                            <strong>Note:</strong> You can apply for licenses later from your dashboard after creating
+                            businesses.
+                        </p>
+                    </div>
 
-                <!-- Step 3: License Application -->
-                <div v-else-if="step === 3">
-                    <ApplicationForm :prevStep="prevStep" :submit="submit" :processing="form.processing"
-                        mode="wizard" />
+                    <BusinessForm mode="wizard" v-model="businessData" @update:modelValue="updateBusinessData" />
+
+                    <!-- Buttons for Step 2 -->
+                    <div class="flex justify-between mt-6">
+                        <PrimaryButton type="button" @click="prevStep" class="bg-gray-500 hover:bg-gray-600">
+                            Back
+                        </PrimaryButton>
+                        <div class="space-x-2">
+                            <PrimaryButton type="button" @click="skipStep2AndRegister"
+                                class="bg-yellow-500 hover:bg-yellow-600" :class="{ 'opacity-25': form.processing }"
+                                :disabled="form.processing">
+                                Skip & Register
+                            </PrimaryButton>
+                            <PrimaryButton type="submit" :class="{ 'opacity-25': form.processing }"
+                                :disabled="form.processing">
+                                Complete Registration
+                            </PrimaryButton>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

@@ -14,6 +14,10 @@ const showApplicationModal = ref(false);
 const ownerBusinesses = ref([]);
 const loadingBusinesses = ref(false);
 
+// License data
+const ownerLicenses = ref([]);
+const loadingLicenses = ref(false);
+
 // Admin-specific states
 const showApplicationsModal = ref(false);
 const applications = ref([
@@ -70,9 +74,22 @@ const handleBusinessSubmit = async (formData) => {
   }
 };
 
-const handleApplicationSubmit = () => {
-  console.log("Application submitted");
-  closeApplicationModal();
+const handleApplicationSubmit = async (formData) => {
+  try {
+    await router.post(route('licenses.store'), formData, {
+      onSuccess: () => {
+        console.log("License application submitted successfully");
+        closeApplicationModal();
+        // Reload licenses after successful submission
+        loadOwnerLicenses();
+      },
+      onError: (errors) => {
+        console.error("License application failed:", errors);
+      }
+    });
+  } catch (error) {
+    console.error("Error submitting license application:", error);
+  }
 };
 
 // Admin functions
@@ -136,10 +153,35 @@ const loadOwnerBusinesses = async () => {
   }
 };
 
-// Load businesses when component mounts
+// Load owner's licenses
+const loadOwnerLicenses = async () => {
+  if (props.auth?.user?.role !== 'owner') return;
+
+  loadingLicenses.value = true;
+  try {
+    const response = await fetch(route('licenses.mine'), {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      ownerLicenses.value = data;
+    }
+  } catch (error) {
+    console.error('Error loading licenses:', error);
+  } finally {
+    loadingLicenses.value = false;
+  }
+};
+
+// Load data when component mounts
 onMounted(() => {
   if (props.auth?.user?.role === 'owner') {
     loadOwnerBusinesses();
+    loadOwnerLicenses();
   }
 });
 </script>
@@ -223,23 +265,35 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- Column 2 - Applications -->
+        <!-- Column 2 - License Applications -->
         <div class="bg-white shadow rounded-lg p-6">
           <h3 class="text-lg font-semibold text-gray-800 mb-4">
-            Your Applications
+            Your License Applications
           </h3>
-          <ul class="divide-y divide-gray-200">
-            <li class="py-3 flex justify-between items-center">
-              <span>Application #1</span>
-              <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">Pending</span>
-            </li>
-            <li class="py-3 flex justify-between items-center">
-              <span>Application #2</span>
-              <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Approved</span>
-            </li>
-            <li class="py-3 flex justify-between items-center">
-              <span>Application #3</span>
-              <span class="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Rejected</span>
+
+          <div v-if="loadingLicenses" class="text-center py-4">
+            <p class="text-gray-500">Loading...</p>
+          </div>
+
+          <div v-else-if="ownerLicenses.length === 0" class="text-center py-4">
+            <p class="text-gray-500">No license applications yet</p>
+            <p class="text-sm text-gray-400 mt-2">Click "Apply for License" to submit your first application</p>
+          </div>
+
+          <ul v-else class="divide-y divide-gray-200">
+            <li v-for="license in ownerLicenses" :key="license.id" class="py-3">
+              <div class="font-medium">{{ license.business_name }}</div>
+              <div class="text-sm text-gray-500">{{ license.license_number }}</div>
+              <div class="text-xs text-gray-400 mt-1 flex items-center justify-between">
+                <span class="px-2 py-1 rounded-full text-xs font-medium" :class="{
+                  'bg-yellow-100 text-yellow-700': license.status === 'Pending',
+                  'bg-green-100 text-green-700': license.status === 'Active',
+                  'bg-red-100 text-red-700': license.status === 'Expired' || license.status === 'Revoked',
+                }">
+                  {{ license.status }}
+                </span>
+                <span class="text-xs">{{ license.issue_date }}</span>
+              </div>
             </li>
           </ul>
         </div>
@@ -280,7 +334,31 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Admin Dashboard -->
+    <!-- Business Modal - Only for Owner -->
+    <div v-if="showBusinessModal && props.auth?.user?.role === 'owner'"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">Business Info</h3>
+          <button @click="closeBusinessModal" class="text-gray-500 hover:text-gray-700">✕</button>
+        </div>
+        <BusinessForm :submit="handleBusinessSubmit" mode="standalone" />
+      </div>
+    </div>
+
+    <!-- Application Modal - Only for Owner -->
+    <div v-if="showApplicationModal && props.auth?.user?.role === 'owner'"
+      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold">License Application</h3>
+          <button @click="closeApplicationModal" class="text-gray-500 hover:text-gray-700">✕</button>
+        </div>
+        <ApplicationForm :submit="handleApplicationSubmit" :processing="false" mode="standalone" />
+      </div>
+    </div>
+
+    <!-- Admin Dashboard  -->
     <div v-else-if="props.auth?.user?.role === 'admin'" class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
       <!-- Admin Header -->
       <div class="bg-white shadow rounded-lg p-6">
@@ -484,32 +562,6 @@ onMounted(() => {
             Dismiss
           </button>
         </div>
-      </div>
-    </div>
-
-    <!-- Business Modal - Only for Owner -->
-    <div v-if="showBusinessModal && props.auth?.user?.role === 'owner'"
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Business Info</h3>
-          <button @click="closeBusinessModal" class="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        <!-- BusinessForm component would go here -->
-        <BusinessForm :submit="handleBusinessSubmit" mode="standalone" />
-      </div>
-    </div>
-
-    <!-- Application Modal - Only for Owner -->
-    <div v-if="showApplicationModal && props.auth?.user?.role === 'owner'"
-      class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">License Application</h3>
-          <button @click="closeApplicationModal" class="text-gray-500 hover:text-gray-700">✕</button>
-        </div>
-        <!-- ApplicationForm component would go here -->
-        <ApplicationForm :submit="handleApplicationSubmit" :processing="false" mode="standalone" />
       </div>
     </div>
 

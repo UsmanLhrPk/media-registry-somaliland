@@ -79,13 +79,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     | Media Entities
     |--------------------------------------------------------------------------
     */
-    // Route::get('media-entities', [MediaEntityController::class, 'index'])->middleware('role:admin|reviewer');
-    // Route::get('media-entities/mine', [MediaEntityController::class, 'myEntities'])->middleware('role:owner');
-    // Route::get('media-entities/{id}', [MediaEntityController::class, 'show'])->middleware('role:admin|reviewer|owner');
-    // Route::post('media-entities', [MediaEntityController::class, 'store'])->middleware('role:owner|admin');
-    // Route::put('media-entities/{id}', [MediaEntityController::class, 'update'])->middleware('role:owner|admin');
-    // Route::delete('media-entities/{id}', [MediaEntityController::class, 'destroy'])->middleware('role:admin');
-
    Route::middleware('auth')->group(function () {
     // Store business information
     Route::post('/media-entities', [MediaEntityController::class, 'store'])->name('media-entities.store');
@@ -130,9 +123,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::get('licenses', [LicenseController::class, 'index'])->middleware('role:admin|reviewer');
-    Route::get('licenses/mine', [LicenseController::class, 'myLicenses'])->middleware('role:owner');
+    Route::get('licenses/mine', [LicenseController::class, 'myLicenses'])->middleware('role:owner')->name('licenses.mine');
     Route::get('licenses/{id}', [LicenseController::class, 'show'])->middleware('role:admin|reviewer|owner');
-    Route::post('licenses', [LicenseController::class, 'store'])->middleware('role:admin');
+    Route::post('licenses', [LicenseController::class, 'store'])->middleware('role:owner')->name('licenses.store');
     Route::put('licenses/{id}', [LicenseController::class, 'update'])->middleware('role:admin');
     Route::delete('licenses/{id}', [LicenseController::class, 'destroy'])->middleware('role:admin');
 
