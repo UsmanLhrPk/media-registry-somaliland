@@ -178,6 +178,7 @@ const loadOwnerLicenses = async () => {
 // Load all licenses for admin - NOW USING WORKING ROUTE!
 const loadAdminLicenses = async () => {
   const userRole = props.auth?.user?.role;
+  console.log("user role", userRole)
 
   if (!['admin', 'super_admin', 'superadmin'].includes(userRole)) return;
 
@@ -231,7 +232,7 @@ onMounted(() => {
 
     <Head title="Dashboard" />
 
-    <div class="py-12">
+    <div class="py-4">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
         <!-- Common Header for all roles -->
@@ -240,34 +241,55 @@ onMounted(() => {
             <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
 
             <!-- User Info Card -->
-            <div class="bg-gray-50 p-4 rounded-lg mb-6">
-              <h2 class="text-lg font-semibold mb-2">Welcome, {{ props.auth?.user?.name }}!</h2>
-              <p class="text-gray-600">Email: {{ props.auth?.user?.email }}</p>
+      <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
 
-              <!-- Logout Button -->
-              <button @click="logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow mt-4">
-                Logout
-              </button>
+      <div class="bg-gray-50 p-6 rounded-xl shadow-inner">
+  <!-- Top Row: Name + Logout -->
+  <div class="flex justify-between items-center mb-2">
+    <h2 class="text-xl font-semibold">
+      Welcome, {{ props.auth?.user?.name }}!
+    </h2>
+    <button
+      @click="logout"
+      class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+    >
+      Logout
+    </button>
+  </div>
 
-              <!-- Role Display -->
-              <div class="mt-4">
-                <div v-if="props.auth?.user?.role === 'owner'"
-                  class="bg-green-100 text-green-800 px-3 py-1 rounded-full inline-block">
-                  <strong>Owner</strong>
-                </div>
-                <div v-else-if="props.auth?.user?.role === 'admin'"
-                  class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full inline-block">
-                  <strong>Admin</strong>
-                </div>
-                <div v-else-if="props.auth?.user?.role === 'super_admin' || props.auth?.user?.role === 'superadmin'"
-                  class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full inline-block">
-                  <strong>Super Admin</strong>
-                </div>
-                <div v-else class="bg-gray-100 text-gray-800 px-3 py-1 rounded-full inline-block">
-                  <strong>User</strong>
-                </div>
-              </div>
-            </div>
+  <!-- Email under the row -->
+  <p class="text-gray-600">Email: {{ props.auth?.user?.email }}</p>
+  <div class="mt-5">
+            <span
+              v-if="props.auth?.user?.role === 'superadmin'"
+              class="bg-red-100 text-red-800 px-4 py-1.5 rounded-full text-sm font-medium"
+            >
+              Super Admin
+            </span>
+
+            <span
+              v-else-if="props.auth?.user?.role === 'admin'"
+              class="bg-blue-100 text-blue-800 px-4 py-1.5 rounded-full text-sm font-medium"
+            >
+              Admin
+            </span>
+
+            <span
+              v-else-if="props.auth?.user?.role === 'owner'"
+              class="bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-medium"
+            >
+              Owner
+            </span>
+
+            <span
+              v-else
+              class="bg-gray-100 text-gray-800 px-4 py-1.5 rounded-full text-sm font-medium"
+            >
+              User
+            </span>
+          </div>
+          </div>
+          </div>
           </div>
         </div>
       </div>
@@ -380,6 +402,7 @@ onMounted(() => {
       <div class="bg-white shadow rounded-lg p-6">
         <h3 class="text-xl font-semibold text-gray-800 mb-2">Admin Dashboard</h3>
         <p class="text-gray-600">Manage all license applications from here.</p>
+         <OwnersIndex :owners="props.owners" />
 
         <!-- Stats Card -->
         <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -470,6 +493,8 @@ onMounted(() => {
       <div class="bg-white shadow rounded-lg p-6">
         <h3 class="text-xl font-semibold text-gray-800 mb-2">Super Admin Dashboard</h3>
         <p class="text-gray-600">Full system control and license application management.</p>
+         <AdminsIndex :admins="props.admins" />
+          <OwnersIndex :owners="props.owners" />
 
         <!-- Enhanced Stats Card -->
         <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -493,42 +518,7 @@ onMounted(() => {
             </p>
           </div>
         </div>
-      </div>
-
-      <!-- Quick Actions for Super Admin -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-red-50 p-4 rounded-lg">
-          <h4 class="font-semibold text-red-800 mb-2">User Management</h4>
-          <p class="text-sm text-red-600">Manage all system users</p>
-          <button class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-            Manage Users
-          </button>
-        </div>
-
-        <div class="bg-blue-50 p-4 rounded-lg">
-          <h4 class="font-semibold text-blue-800 mb-2">Admin Management</h4>
-          <p class="text-sm text-blue-600">Manage admin accounts</p>
-          <button class="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Manage Admins
-          </button>
-        </div>
-
-        <div class="bg-yellow-50 p-4 rounded-lg">
-          <h4 class="font-semibold text-yellow-800 mb-2">System Settings</h4>
-          <p class="text-sm text-yellow-600">Configure system parameters</p>
-          <button class="mt-3 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700">
-            Settings
-          </button>
-        </div>
-
-        <div class="bg-indigo-50 p-4 rounded-lg">
-          <h4 class="font-semibold text-indigo-800 mb-2">System Logs</h4>
-          <p class="text-sm text-indigo-600">View system activity</p>
-          <button class="mt-3 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-            View Logs
-          </button>
-        </div>
-      </div>
+      </div> 
 
       <!-- License Applications Management for Super Admin -->
       <div class="bg-white shadow rounded-lg p-6">

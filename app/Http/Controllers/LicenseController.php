@@ -87,38 +87,31 @@ class LicenseController extends Controller
     /**
      * Update license status (approve/reject)
      */
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:active,revoked',
-            'admin_comment' => 'nullable|string|max:1000',
-        ]);
+ public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:active,revoked',
+        'admin_comment' => 'nullable|string|max:1000',
+    ]);
 
-        $license = License::findOrFail($id);
-        
-        // Update license status
-        $license->update([
-            'status' => $request->status,
-        ]);
+    $license = License::findOrFail($id);
 
-        // Log admin action
-        \Log::info('License status updated', [
-            'license_id' => $license->id,
-            'old_status' => $license->getOriginal('status'),
-            'new_status' => $request->status,
-            'admin_id' => Auth::id(),
-            'admin_comment' => $request->admin_comment,
-        ]);
+    $license->update([
+        'status' => $request->status,
+    ]);
 
-        return response()->json([
-            'message' => 'License status updated successfully',
-            'license' => [
-                'id' => $license->id,
-                'status' => $license->status,
-                'license_number' => $license->license_number,
-            ]
-        ]);
-    }
+    \Log::info('License status updated', [
+        'license_id' => $license->id,
+        'old_status' => $license->getOriginal('status'),
+        'new_status' => $request->status,
+        'admin_id' => Auth::id(),
+        'admin_comment' => $request->admin_comment,
+    ]);
+
+    // ✅ Instead of JSON, redirect back with flash for Inertia
+    return redirect()->back()->with('success', 'License status updated successfully.');
+}
+
 
     /**
      * Get licenses for the authenticated owner
