@@ -3,7 +3,8 @@ import AppLayout from '@/Layouts/AppLayout.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { ref, onMounted } from 'vue';
 import BusinessForm from './Auth/BusinessForm.vue';
-import ApplicationForm from './Auth/ApplicationForm.vue';import AdminsIndex from '@/Pages/Admin/Index.vue'
+import ApplicationForm from './Auth/ApplicationForm.vue';
+import AdminsIndex from '@/Pages/Admin/Index.vue'
 import OwnersIndex from '@/Pages/Owners/Index.vue'
 
 
@@ -522,6 +523,5 @@ onMounted(() => {
         <ApplicationForm :submit="handleApplicationSubmit" :processing="false" mode="standalone" />
       </div>
     </div>
-
-  </div>
+  </AppLayout>
 </template>
