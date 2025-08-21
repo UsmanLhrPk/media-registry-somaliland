@@ -124,14 +124,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     */
 
     // Admin/Super Admin only routes
-    Route::get('licenses', [LicenseController::class, 'index'])->middleware('role:admin|superadmin')->name('licenses.index');
+    Route::get('licenses', [LicenseController::class, 'index'])->middleware('role:admin,superadmin')->name('licenses.index');
     Route::get('licenses/mine', [LicenseController::class, 'myLicenses'])->middleware('role:owner')->name('licenses.mine');
-    Route::get('licenses/{id}', [LicenseController::class, 'show'])->middleware('role:admin|superadmin|owner');
+    Route::get('licenses/{id}', [LicenseController::class, 'show'])->middleware('role:admin,superadmin,owner');
     Route::post('licenses', [LicenseController::class, 'store'])->middleware('role:owner')->name('licenses.store');
-    Route::put('licenses/{id}/status', [LicenseController::class, 'updateStatus'])->middleware('role:admin|superadmin')->name('licenses.update-status');
-    Route::delete('licenses/{id}', [LicenseController::class, 'destroy'])->middleware('role:admin|superadmin');
-    Route::put('licenses/{id}', [LicenseController::class, 'update'])->middleware('role:admin|superadmin');    
-
+    Route::put('licenses/{id}/status', [LicenseController::class, 'updateStatus'])->middleware('role:admin,superadmin')->name('licenses.update-status');
+    Route::delete('licenses/{id}', [LicenseController::class, 'destroy'])->middleware('role:admin,superadmin');
+    Route::put('licenses/{id}', [LicenseController::class, 'update'])->middleware('role:admin,superadmin');
     /*
     |--------------------------------------------------------------------------
     | Search (Laravel Scout)
