@@ -3,9 +3,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import InputError from '@/Components/InputError.vue';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
-const emit = defineEmits(["submitted"]);
+const emit = defineEmits(["submitted", "update:modelValue"]);
 
 const props = defineProps({
   prevStep: Function,
@@ -40,6 +40,13 @@ const businessForm = ref({
 
 // Form errors
 const errors = ref({});
+
+// Watch for changes and emit to parent
+watch(businessForm, (newValue) => {
+  if (props.mode === 'wizard') {
+    emit('update:modelValue', newValue);
+  }
+}, { deep: true });
 
 // Validation function
 const validateForm = () => {
@@ -189,9 +196,7 @@ const handleNext = () => {
     </div>
 
     <!-- Wizard Mode -->
-    <div v-if="mode === 'wizard'" class="flex justify-between mt-6">
-      <PrimaryButton type="button" @click="props.prevStep">Back</PrimaryButton>
-      <PrimaryButton type="button" @click="handleNext">Next</PrimaryButton>
+    <div v-if="mode === 'wizard'">
     </div>
 
     <!-- Standalone Mode -->

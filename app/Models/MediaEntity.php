@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MediaEntity extends Model
 {
@@ -25,6 +26,14 @@ class MediaEntity extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(Owner::class);
+    }
+
+    /**
+     * Get the licenses for the media entity.
+     */
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
     }
 
     /**
