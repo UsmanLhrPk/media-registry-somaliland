@@ -238,8 +238,6 @@ onMounted(() => {
         <!-- Common Header for all roles -->
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-6">
           <div class="p-6">
-            <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
-
             <!-- User Info Card -->
       <div class="bg-white rounded-2xl shadow-lg p-8 space-y-8">
 
@@ -302,9 +300,6 @@ onMounted(() => {
 
         <!-- Column 1 - Welcome & Actions -->
         <div class="bg-white shadow rounded-lg p-6">
-          <h3 class="text-lg font-semibold text-gray-800 mb-4">
-            Welcome Back!
-          </h3>
           <p class="text-gray-600 mb-6">
             Use the quick actions below to manage your businesses and apply for licenses.
           </p>
