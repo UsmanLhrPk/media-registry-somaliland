@@ -12,16 +12,16 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return redirect()->route('login');
 });
+
+Route::get('/admin', function () {
+    return Inertia::render('Admin/Applications'); 
+})->name('admin');
 
 Route::middleware([
     'auth:sanctum',
@@ -58,11 +58,20 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
+    | Admins (Super Admin only)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['auth', 'role:superadmin'])->group(function () {
+        Route::resource('admins', AdminController::class);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
     | Owners (Admin only)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:admin'])->group(function () {
-        Route::apiResource('owners', OwnerController::class)->except(['create', 'edit']);
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('owners', OwnerController::class);
     });
 
     /*
@@ -70,24 +79,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
     | Media Entities
     |--------------------------------------------------------------------------
     */
-    Route::get('media-entities', [MediaEntityController::class, 'index'])->middleware('role:admin|reviewer');
-    Route::get('media-entities/mine', [MediaEntityController::class, 'myEntities'])->middleware('role:owner');
-    Route::get('media-entities/{id}', [MediaEntityController::class, 'show'])->middleware('role:admin|reviewer|owner');
-    Route::post('media-entities', [MediaEntityController::class, 'store'])->middleware('role:owner|admin');
-    Route::put('media-entities/{id}', [MediaEntityController::class, 'update'])->middleware('role:owner|admin');
-    Route::delete('media-entities/{id}', [MediaEntityController::class, 'destroy'])->middleware('role:admin');
-
+   Route::middleware('auth')->group(function () {
+    // Store business information
+    Route::post('/media-entities', [MediaEntityController::class, 'store'])->name('media-entities.store');
+    
+    // Get owner's media entities
+    Route::get('/api/owner/media-entities', [MediaEntityController::class, 'getOwnerMediaEntities'])->name('owner.media-entities');
+});
+   
     /*
     |--------------------------------------------------------------------------
     | Applications
     |--------------------------------------------------------------------------
     */
-    Route::get('applications', [ApplicationController::class, 'index'])->middleware('role:admin|reviewer');
+    Route::get('applications', [ApplicationController::class, 'index'])->middleware('role:admin|superadmin');
     Route::get('applications/mine', [ApplicationController::class, 'myApplications'])->middleware('role:owner');
-    Route::get('applications/{id}', [ApplicationController::class, 'show'])->middleware('role:admin|reviewer|owner');
+    Route::get('applications/{id}', [ApplicationController::class, 'show'])->middleware('role:admin|owner|superadmin');
     Route::post('applications', [ApplicationController::class, 'store'])->middleware('role:owner');
     Route::put('applications/{id}', [ApplicationController::class, 'update'])->middleware('role:owner');
-    Route::delete('applications/{id}', [ApplicationController::class, 'destroy'])->middleware('role:owner|admin');
+    Route::delete('applications/{id}', [ApplicationController::class, 'destroy'])->middleware('role:owner|admin|superadmin');
     Route::post('applications/{id}/submit', [ApplicationController::class, 'submit'])->middleware('role:owner');
 
     /*
@@ -95,47 +105,49 @@ Route::middleware(['auth:sanctum'])->group(function () {
     | Application Documents
     |--------------------------------------------------------------------------
     */
-    Route::get('applications/{id}/documents', [ApplicationDocumentController::class, 'index'])->middleware('role:admin|reviewer|owner');
+    Route::get('applications/{id}/documents', [ApplicationDocumentController::class, 'index'])->middleware('role:admin|owner|superadmin');
     Route::post('applications/{id}/documents', [ApplicationDocumentController::class, 'store'])->middleware('role:owner');
-    Route::delete('documents/{id}', [ApplicationDocumentController::class, 'destroy'])->middleware('role:owner|admin');
+    Route::delete('documents/{id}', [ApplicationDocumentController::class, 'destroy'])->middleware('role:owner|admin|superadmin');
 
     /*
     |--------------------------------------------------------------------------
     | Application Reviews
     |--------------------------------------------------------------------------
     */
-    Route::post('applications/{id}/review', [ApplicationReviewController::class, 'store'])->middleware('role:reviewer|admin');
-    Route::get('applications/{id}/reviews', [ApplicationReviewController::class, 'index'])->middleware('role:admin|reviewer|owner');
+    Route::post('applications/{id}/review', [ApplicationReviewController::class, 'store'])->middleware('role:reviewer|admin|superadmin');
+    Route::get('applications/{id}/reviews', [ApplicationReviewController::class, 'index'])->middleware('role:admin|reviewer|owner|superadmin');
 
     /*
     |--------------------------------------------------------------------------
     | Licenses
     |--------------------------------------------------------------------------
     */
-    Route::get('licenses', [LicenseController::class, 'index'])->middleware('role:admin|reviewer');
-    Route::get('licenses/mine', [LicenseController::class, 'myLicenses'])->middleware('role:owner');
-    Route::get('licenses/{id}', [LicenseController::class, 'show'])->middleware('role:admin|reviewer|owner');
-    Route::post('licenses', [LicenseController::class, 'store'])->middleware('role:admin');
-    Route::put('licenses/{id}', [LicenseController::class, 'update'])->middleware('role:admin');
-    Route::delete('licenses/{id}', [LicenseController::class, 'destroy'])->middleware('role:admin');
 
+    // Admin/Super Admin only routes
+    Route::get('licenses', [LicenseController::class, 'index'])->middleware('role:admin,superadmin')->name('licenses.index');
+    Route::get('licenses/mine', [LicenseController::class, 'myLicenses'])->middleware('role:owner')->name('licenses.mine');
+    Route::get('licenses/{id}', [LicenseController::class, 'show'])->middleware('role:admin,superadmin,owner');
+    Route::post('licenses', [LicenseController::class, 'store'])->middleware('role:owner')->name('licenses.store');
+    Route::put('licenses/{id}/status', [LicenseController::class, 'updateStatus'])->middleware('role:admin,superadmin')->name('licenses.update-status');
+    Route::delete('licenses/{id}', [LicenseController::class, 'destroy'])->middleware('role:admin,superadmin');
+    Route::put('licenses/{id}', [LicenseController::class, 'update'])->middleware('role:admin,superadmin');
     /*
     |--------------------------------------------------------------------------
     | Search (Laravel Scout)
     |--------------------------------------------------------------------------
     */
-    Route::get('search', [SearchController::class, 'global'])->middleware('role:admin|reviewer');
-    Route::get('search/entities', [SearchController::class, 'entities'])->middleware('role:admin|reviewer');
-    Route::get('search/owners', [SearchController::class, 'owners'])->middleware('role:admin|reviewer');
+    Route::get('search', [SearchController::class, 'global'])->middleware('role:admin|superadmin');
+    Route::get('search/entities', [SearchController::class, 'entities'])->middleware('role:admin|superadmin');
+    Route::get('search/owners', [SearchController::class, 'owners'])->middleware('role:admin|superadmin');
 
     /*
     |--------------------------------------------------------------------------
     | Reports
     |--------------------------------------------------------------------------
     */
-    Route::get('reports/licenses', [ReportController::class, 'licenses'])->middleware('role:admin');
-    Route::get('reports/applications', [ReportController::class, 'applications'])->middleware('role:admin');
-    Route::get('reports/renewals', [ReportController::class, 'renewals'])->middleware('role:admin');
+    Route::get('reports/licenses', [ReportController::class, 'licenses'])->middleware('role:admin|superadmin');
+    Route::get('reports/applications', [ReportController::class, 'applications'])->middleware('role:admin|superadmin');
+    Route::get('reports/renewals', [ReportController::class, 'renewals'])->middleware('role:admin|superadmin');
 
     /*
     |--------------------------------------------------------------------------
