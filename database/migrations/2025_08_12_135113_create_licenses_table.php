@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('licenses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('media_entity_id');
+            $table->foreignId('media_entity_id')->constrained('media_entities')->onDelete('cascade');
             $table->string('license_number', 100)->unique();
             $table->enum('license_type', ['new', 'renewal'])->default('new');
             $table->date('issue_date');
